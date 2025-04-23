@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pocket Vending Locator</title>
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-XQoYMqMTK8LvdlDXvXO0A5JtKkQYv6q2U5Z+3pLMQ+U="
+    crossorigin=""
+  />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header img {
+      max-width: 250px;
+      margin: 20px 0;
+    }
+    #controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .btn {
+      width: 280px;
+      height: 50px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 1.1em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-blue {
+      background: #007bff;
+    }
+    .btn-black {
+      background: #000;
+    }
+    #map {
+      width: 100%;
+      max-width: 600px;
+      height: 400px;
+      margin-bottom: 30px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header with your Pocket Vending logo -->
+  <header>
+    <img src="/Users/joshcurtis/Library/CloudStorage/OneDrive-BrighamYoungUniversity/Information Systems/Pocket Vending (Logo 1) copy.png" alt="Pocket Vending Logo">
+  </header>
+
+  <!-- Centered menu buttons -->
+  <div id="controls">
+    <button class="btn btn-blue"
+            onclick="window.open('Coming Soon.html', '_blank')">
+      Find Nearby Snacks!
+    </button>
+    <button class="btn btn-black"
+            onclick="window.open('Coming Soon.html', '_blank')">
+      My Rewards
+    </button>
+    <button class="btn btn-black"
+            onclick="window.open('Coming Soon.html', '_blank')">
+      Coming Soon
+    </button>
+  </div>
+
+  <!-- Map container -->
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-o9N1jzwTYDsgK0fepcoyRKCMlFjYSmkDm9Zu4wYyMlw="
+    crossorigin=""
+  ></script>
+  <script>
+    // Initialize map centered on Provo, UT
+    const map = L.map('map').setView([40.2338, -111.6585], 13);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Click map to drop a vending pin
+    map.on('click', e => {
+      L.marker(e.latlng, { title: 'Pocket Vending Machine' })
+       .addTo(map);
+    });
+
+    // “Find Nearby Snacks!” = geolocate + circle marker
+    document.getElementById('find-btn')
+      .addEventListener('click', () => {
+        if (!navigator.geolocation) {
+          alert('Geolocation not supported by your browser');
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(pos => {
+          const { latitude, longitude } = pos.coords;
+          map.setView([latitude, longitude], 15);
+          L.circleMarker([latitude, longitude], {
+            radius: 8,
+            fillColor: '#3388ff',
+            fillOpacity: 0.9,
+            color: '#fff',
+            weight: 2
+          })
+          .bindPopup('You are here')
+          .addTo(map)
+          .openPopup();
+        }, () => {
+          alert('Unable to retrieve your location');
+        });
+      });
+
+    // Any other button → open new window/tab with "Coming Soon!"
+    ['rewards-btn', 'coming-btn'].forEach(id => {
+      document.getElementById(id)
+        .addEventListener('click', () => {
+          const win = window.open('', '_blank');
+          win.document.write(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8" />
+              <title>Coming Soon!</title>
+              <style>
+                body {
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  height: 100vh;
+                  margin: 0;
+                  font-family: sans-serif;
+                }
+                h1 {
+                  font-size: 2em;
+                }
+              </style>
+            </head>
+            <body>
+              <h1>Coming Soon!</h1>
+            </body>
+            </html>
+          `);
+          win.document.close();
+        });
+    });
+  </script>
+</body>
+</html>
